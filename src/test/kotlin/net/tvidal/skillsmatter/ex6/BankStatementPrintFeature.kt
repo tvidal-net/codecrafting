@@ -1,4 +1,4 @@
-package net.tvidal.skillsmatter.ex5
+package net.tvidal.skillsmatter.ex6
 
 import com.nhaarman.mockito_kotlin.inOrder
 import org.junit.Before
@@ -14,19 +14,19 @@ class BankStatementPrintFeature {
 
     lateinit var accountService: AccountService
 
-    @Mock lateinit var dateProvider: DateProvider
+    @Mock lateinit var clock: Clock
 
     @Mock lateinit var console: Console
 
     @Before fun initialize() {
         accountService = AccountService(
-                statementPrinter = StatementPrinter(console),
-                dateProvider = dateProvider
+                console = console,
+                clock = clock
         )
     }
 
     @Test fun `print statement with entries in reverse order`() {
-        given(dateProvider.currentDate()).willReturn(
+        given(clock.currentDate()).willReturn(
                 dateOf(2014, 4, 1),
                 dateOf(2014, 4, 2),
                 dateOf(2014, 4, 10)
@@ -45,7 +45,7 @@ class BankStatementPrintFeature {
 
     private fun dateOf(year: Int, month: Int, day: Int): Date {
         Calendar.getInstance().let {
-            it.set(year, month, day)
+            it.set(year, month - 1, day)
             return it.time;
         }
     }

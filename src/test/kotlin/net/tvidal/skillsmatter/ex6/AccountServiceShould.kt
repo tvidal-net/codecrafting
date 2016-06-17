@@ -1,4 +1,4 @@
-package net.tvidal.skillsmatter.ex5
+package net.tvidal.skillsmatter.ex6
 
 import com.nhaarman.mockito_kotlin.verify
 import org.junit.Before
@@ -18,13 +18,13 @@ class AccountServiceShould {
 
     @Mock lateinit var statementPrinter: StatementPrinter
 
-    @Mock lateinit var dateProvider: DateProvider
+    @Mock lateinit var clock: Clock
 
     @Before fun initialize() {
         accountService = AccountService(
                 transactionRepository = transactionRepository,
                 statementPrinter = statementPrinter,
-                dateProvider = dateProvider
+                clock = clock
         )
     }
 
@@ -33,7 +33,7 @@ class AccountServiceShould {
         val amount = 15
         val expected = Transaction(date, -amount)
 
-        given(dateProvider.currentDate()).willReturn(date)
+        given(clock.currentDate()).willReturn(date)
         accountService.withdraw(amount)
 
         verify(transactionRepository).append(expected)
@@ -44,7 +44,7 @@ class AccountServiceShould {
         val amount = 40
         val expected = Transaction(date, amount)
 
-        given(dateProvider.currentDate()).willReturn(date)
+        given(clock.currentDate()).willReturn(date)
         accountService.deposit(amount)
 
         verify(transactionRepository).append(expected)

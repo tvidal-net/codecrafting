@@ -1,6 +1,8 @@
-package net.tvidal.skillsmatter.ex5
+package net.tvidal.skillsmatter.ex6
 
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 data class Transaction(
         val date: Date,
@@ -21,7 +23,7 @@ open class TransactionRepository {
 
 }
 
-open class DateProvider {
+open class Clock {
 
     open fun currentDate() = Date()
 
@@ -38,16 +40,17 @@ open class Console {
 open class StatementPrinter(val console: Console) {
 
     companion object {
-        val HEADER = "   DATE    |  AMOUNT | BALANCE"
-        val FORMAT = "%dd/MM/yyyyT | %4d.00 | %4d.00"
+        val STATEMENT_HEADER = "   DATE    |  AMOUNT | BALANCE"
+        val DATE_FORMATTER = SimpleDateFormat("dd/MM/yyyy")
+        val TRANSACTION_FORMAT = "%-10s | %4d.00 | %4d.00"
     }
 
     open fun printStatement(transactions: Collection<Transaction>) {
-        console.println(HEADER)
-        var runningBalance = 0
+        console.println(STATEMENT_HEADER)
+        val runningBalance = AtomicInteger()
         transactions.map {
-            runningBalance += it.amount
-            FORMAT.format(it.date, it.amount, runningBalance)
+            val formattedDate = DATE_FORMATTER.format(it.date)
+            TRANSACTION_FORMAT.format(formattedDate, it.amount, runningBalance.addAndGet(it.amount))
         }
                 .reversed()
                 .forEach { console.println(it) }
@@ -55,19 +58,20 @@ open class StatementPrinter(val console: Console) {
 }
 
 class AccountService(
+        console: Console = Console(),
         val transactionRepository: TransactionRepository = TransactionRepository(),
-        val statementPrinter: StatementPrinter = StatementPrinter(Console()),
-        val dateProvider: DateProvider = DateProvider()
+        val statementPrinter: StatementPrinter = StatementPrinter(console),
+        val clock: Clock = Clock()
 ) {
 
     fun deposit(amount: Int) {
-        val date = dateProvider.currentDate()
+        val date = clock.currentDate()
         val transaction = Transaction(date, amount)
         transactionRepository.append(transaction)
     }
 
     fun withdraw(amount: Int) {
-        val date = dateProvider.currentDate()
+        val date = clock.currentDate()
         val transaction = Transaction(date, -amount)
         transactionRepository.append(transaction)
     }
