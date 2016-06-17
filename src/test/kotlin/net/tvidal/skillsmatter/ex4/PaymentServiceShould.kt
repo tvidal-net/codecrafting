@@ -33,7 +33,7 @@ class PaymentServiceShould {
     @Test fun `throw exception if user is not valid`() {
         given(userValidator.validateUser(invalidUser)).willReturn(false)
         try {
-            paymentService.executePayment(invalidUser, paymentDetails)
+            paymentService.processPayment(invalidUser, paymentDetails)
             fail("Should throw exception if user is not valid!")
         } catch (e: InvalidUserException) {
             verify(userValidator).validateUser(invalidUser)
@@ -43,7 +43,7 @@ class PaymentServiceShould {
 
     @Test fun `send payment details to payment gateway if user is valid`() {
         given(userValidator.validateUser(validUser)).willReturn(true)
-        paymentService.executePayment(validUser, paymentDetails)
+        paymentService.processPayment(validUser, paymentDetails)
 
         verify(userValidator).validateUser(validUser)
         verify(paymentGateway).sendPayment(paymentDetails)

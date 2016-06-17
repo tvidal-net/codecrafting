@@ -5,7 +5,7 @@ class PaymentService(
         val paymentGateway: PaymentGateway
 ) {
 
-    fun executePayment(user: User, paymentDetails: PaymentDetails) {
+    fun processPayment(user: User, paymentDetails: PaymentDetails) {
         if (!userValidator.validateUser(user)) {
             throw InvalidUserException()
         }
